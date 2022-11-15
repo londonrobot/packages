@@ -40,6 +40,11 @@ const resources = () => {
   .pipe(gulp.dest('build'));
 }
 
+const fonts = () => {
+  return gulp.src('dev/fonts/**')
+  .pipe(gulp.dest('build/fonts'));
+}
+
 // сервер
 const server = (done) => {
   browsersync.init({
@@ -71,7 +76,7 @@ const scss = () => {
       extname: ".min.css"
     }))
     .pipe(gulp.dest("build/css"))
-    .pipe(browsersync.stream());
+    .on("end", browsersync.reload);
 }
 
 // опционально
@@ -113,8 +118,8 @@ const svgSprite = () => {
     .pipe(svgsprite({
       mode: {
         stack: {
-          sprite: '../sprite.svg',
-          example: true // превью всех свгшек , можно не включать
+          sprite: `../svg/sprite.svg`,
+          // example: true // превью всех свгшек , можно не включать
         }
       }
     }))
@@ -143,19 +148,19 @@ const images = () => {
 
 
 function watcher() {
-  gulp.watch('dev/res/**', resources);
+  gulp.watch('dev/res/**/*.*', resources);
+  gulp.watch('dev/fonts/**', fonts);
   gulp.watch('dev/**/*.html', html);
   gulp.watch('dev/**/*.pug', pugtask);
   gulp.watch('dev/sass/**/*.scss', scss);
   gulp.watch('dev/js/**/*.*', js);
-  gulp.watch('dev/images/svg/**/*.svg', svgSprite);
+  gulp.watch('dev/images/svg/*.svg', svgSprite);
   gulp.watch('dev/images/*.*', images); 
 }
 
 
-const main = gulp.parallel(resources, pugtask, html, scss, js, svgSprite, images); 
+const main = gulp.parallel(resources, fonts, pugtask, html, scss, js, svgSprite, images); 
 export const dev = gulp.series(clean, main, gulp.parallel(watcher, server));
 export const build = gulp.series(clean, main);
 gulp.task('default', dev);
-gulp.task('build', build);
 
